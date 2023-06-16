@@ -1,9 +1,9 @@
 use std::fmt;
-use std::ops::{Add, Mul};
+use std::ops::{Add, Sub, Mul};
 
 pub struct Matrix {
-    rows: usize,
-    cols: usize,
+    pub rows: usize,
+    pub cols: usize,
     data: Vec<Vec<f64>>,
 }
 
@@ -30,6 +30,18 @@ impl Matrix {
         }
     }
 
+    pub fn apply<F>(&self, f: F) -> Self
+    where
+        F: Fn(f64) -> f64,
+    {
+        let data = self
+            .data
+            .iter()
+            .map(|row| row.iter().map(|&x| f(x)).collect())
+            .collect();
+        Self::new(data)
+    }
+
     pub fn transpose(&self) -> Self {
         let mut transposed_data = vec![vec![0.0; self.rows]; self.cols];
         for i in 0..self.rows {
@@ -40,10 +52,15 @@ impl Matrix {
         Self::new(transposed_data)
     }
 
-    pub fn add_matrix(&self, other: &Self) -> Matrix {
+}
+
+impl<'a, 'b> Add<&'b Matrix> for &'a Matrix {
+    type Output = Matrix;
+
+    fn add(self, other: &'b Matrix) -> Self::Output {
         assert_eq!(self.rows, other.rows);
         assert_eq!(self.cols, other.cols);
-        let mut result = Self::zeros(self.rows, self.cols);
+        let mut result = Matrix::zeros(self.rows, self.cols);
         for i in 0..self.rows {
             for j in 0..self.cols {
                 result.data[i][j] = self.data[i][j] + other.data[i][j];
@@ -51,10 +68,14 @@ impl Matrix {
         }
         result
     }
+}
 
-    pub fn matmul(&self, other: &Self) -> Self {
+impl<'a, 'b> Mul<&'b Matrix> for &'a Matrix {
+    type Output = Matrix;
+
+    fn mul(self, other: &'b Matrix) -> Self::Output {
         assert_eq!(self.cols, other.rows);
-        let mut result = Self::zeros(self.rows, other.cols);
+        let mut result = Matrix::zeros(self.rows, other.cols);
         for i in 0..self.rows {
             for j in 0..other.cols {
                 for k in 0..self.cols {
@@ -66,19 +87,19 @@ impl Matrix {
     }
 }
 
-impl<'a, 'b> Add<&'b Matrix> for &'a Matrix {
+impl<'a, 'b> Sub<&'b Matrix> for &'a Matrix {
     type Output = Matrix;
 
-    fn add(self, other: &'b Matrix) -> Self::Output {
-        self.add_matrix(other)
-    }
-}
-
-impl<'a, 'b> Mul<&'b Matrix> for &'a Matrix {
-    type Output = Matrix;
-
-    fn mul(self, other: &'b Matrix) -> Self::Output {
-        self.matmul(other)
+    fn sub(self, other: &'b Matrix) -> Self::Output {
+        assert_eq!(self.rows, other.rows);
+        assert_eq!(self.cols, other.cols);
+        let mut result = Matrix::zeros(self.rows, self.cols);
+        for i in 0..self.rows {
+            for j in 0..self.cols {
+                result.data[i][j] = self.data[i][j] - other.data[i][j];
+            }
+        }
+        result
     }
 }
 
@@ -133,6 +154,14 @@ mod tests {
         let b = Matrix::ones(2, 2);
         let result = &a + &b;
         assert_eq!(result.data, vec![vec![2.0, 2.0], vec![2.0, 2.0]]);
+    }
+
+    #[test]
+    fn test_subtract() {
+        let a = Matrix::ones(2, 2);
+        let b = Matrix::ones(2, 2);
+        let result = &a - &b;
+        assert_eq!(result.data, vec![vec![0.0, 0.0], vec![0.0, 0.0]]);
     }
 
     #[test]
