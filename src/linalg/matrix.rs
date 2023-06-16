@@ -1,10 +1,10 @@
 use std::fmt;
-use std::ops::{Add, Sub, Mul};
+use std::ops::{Add, Mul, Sub};
 
 pub struct Matrix {
     pub rows: usize,
     pub cols: usize,
-    data: Vec<Vec<f64>>,
+    pub data: Vec<Vec<f64>>,
 }
 
 impl Matrix {
@@ -52,6 +52,18 @@ impl Matrix {
         Self::new(transposed_data)
     }
 
+    pub fn matmul(&self, other: &Matrix) -> Matrix {
+        assert_eq!(self.cols, other.rows);
+        let mut result = Matrix::zeros(self.rows, other.cols);
+        for i in 0..self.rows {
+            for j in 0..other.cols {
+                for k in 0..self.cols {
+                    result.data[i][j] += self.data[i][k] * other.data[k][j];
+                }
+            }
+        }
+        result
+    }
 }
 
 impl<'a, 'b> Add<&'b Matrix> for &'a Matrix {
@@ -74,13 +86,12 @@ impl<'a, 'b> Mul<&'b Matrix> for &'a Matrix {
     type Output = Matrix;
 
     fn mul(self, other: &'b Matrix) -> Self::Output {
-        assert_eq!(self.cols, other.rows);
-        let mut result = Matrix::zeros(self.rows, other.cols);
+        assert_eq!(self.rows, other.rows);
+        assert_eq!(self.cols, other.cols);
+        let mut result = Matrix::zeros(self.rows, self.cols);
         for i in 0..self.rows {
-            for j in 0..other.cols {
-                for k in 0..self.cols {
-                    result.data[i][j] = result.data[i][j] + self.data[i][k] * other.data[k][j];
-                }
+            for j in 0..self.cols {
+                result.data[i][j] = self.data[i][j] * other.data[i][j];
             }
         }
         result
@@ -165,11 +176,19 @@ mod tests {
     }
 
     #[test]
-    fn test_matmul() {
-        let a = Matrix::ones(2, 3);
-        let b = Matrix::ones(3, 2);
+    fn test_mul_elementwise() {
+        let a = Matrix::new(vec![vec![1.0, 2.0], vec![3.0, 4.0]]);
+        let b = Matrix::new(vec![vec![2.0, 3.0], vec![4.0, 5.0]]);
         let result = &a * &b;
-        assert_eq!(result.data, vec![vec![3.0, 3.0], vec![3.0, 3.0]]);
+        assert_eq!(result.data, vec![vec![2.0, 6.0], vec![12.0, 20.0]]);
+    }
+
+    #[test]
+    fn test_matmul() {
+        let a = Matrix::new(vec![vec![1.0, 2.0], vec![3.0, 4.0]]);
+        let b = Matrix::new(vec![vec![2.0, 3.0], vec![4.0, 5.0]]);
+        let result = a.matmul(&b);
+        assert_eq!(result.data, vec![vec![10.0, 13.0], vec![22.0, 29.0]]);
     }
 
     #[test]
@@ -192,9 +211,9 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn test_matmul_incompatible_matrices() {
-        let a = Matrix::ones(2, 3);
-        let b = Matrix::ones(4, 2);
+    fn test_mul_incompatible_matrices() {
+        let a = Matrix::ones(2, 2);
+        let b = Matrix::ones(3, 2);
         let _ = &a * &b;
     }
 }
