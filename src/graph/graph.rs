@@ -12,12 +12,13 @@ pub struct Triplet {
     pub source: Variable,
     pub target: Variable,
     pub transform: Transform,
+    pub error: Option<Matrix>, 
 }
 
 pub struct Graph {
     pub variables: HashSet<Variable>,
     pub triplets: Vec<Triplet>,
-    pub preds: HashMap<Variable, Prediction>,
+    pub preds: HashMap<Variable, Vec<Prediction>>, 
 }
 
 impl Graph {
@@ -37,28 +38,48 @@ impl Graph {
     }
 
     pub fn add_transform(&mut self, source: Variable, target: Variable, transform: Transform) {
-        self.triplets.push(Triplet { source, target, transform });
+        self.triplets.push(Triplet { source, target, transform, error: None }); // Add a None value for the error field when adding a new transform
     }
 
     pub fn forward(&mut self) {
-        for triplet in self.triplets.iter() {
+        for triplet in self.triplets.iter_mut() {
             let pred = triplet.transform.forward(&triplet.source);
             let pred_data = Prediction {
                 variable: triplet.target.clone(),
                 value: pred.clone(),
             };
-            self.preds.insert(triplet.target.clone(), pred_data);
+            // Change the preds entry for the target variable to a Vec, and push the new prediction
+            self.preds.entry(triplet.target.clone()).or_insert_with(Vec::new).push(pred_data);
         }
     }
 
-    pub fn compute_error(&self, target_variables: &HashSet<Variable>) -> HashMap<Variable, Matrix> {
-        let mut errors = HashMap::new();
-        for tgt in target_variables.iter() {
-            if let Some(pred) = self.preds.get(tgt) {
-                let err = &tgt.data - &pred.value;
-                errors.insert(pred.variable.clone(), err);
+    // Modify compute_error to compute errors for every triplet
+    pub fn compute_error(&mut self) {
+        for triplet in self.triplets.iter_mut() {
+            if let Some(preds) = self.preds.get(&triplet.target) {
+                for pred in preds {
+                    let err = &triplet.target.data - &pred.value;
+                    triplet.error = Some(err); // Store the error directly in the triplet
+                }
             }
         }
-        errors
+    }
+
+    // Helper function to get all errors from a specific source variable
+    pub fn get_errors_from_source(&self, source_variable: &Variable) -> Vec<Option<Matrix>> {
+        self.triplets
+            .iter()
+            .filter(|triplet| triplet.source == *source_variable)
+            .map(|triplet| triplet.error.clone())
+            .collect()
+    }
+
+    // Helper function to get all errors that were a result of a specific target variable
+    pub fn get_errors_from_target(&self, target_variable: &Variable) -> Vec<Option<Matrix>> {
+        self.triplets
+            .iter()
+            .filter(|triplet| triplet.target == *target_variable)
+            .map(|triplet| triplet.error.clone())
+            .collect()
     }
 }

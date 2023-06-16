@@ -3,7 +3,6 @@ mod linalg;
 mod graph;
 
 use crate::graph::{variable::Variable, transform::Transform, graph::Graph};
-use std::collections::HashSet;
 
 fn main() {
     let mu = Variable::new("mu", 64);
@@ -16,10 +15,6 @@ fn main() {
     graph.add_transform(mu.clone(), data.clone(), transform);
 
     graph.forward();
-    
-    let mut target_variables = HashSet::new();
-    target_variables.insert(data.clone());
-    let errors = graph.compute_error(&target_variables);
+    graph.compute_error();
 
-    println!("Errors: {:?}", errors);
 }
