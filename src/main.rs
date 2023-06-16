@@ -21,7 +21,5 @@ fn main() {
     target_variables.insert(data.clone());
     let errors = graph.compute_error(&target_variables);
 
-    println!("Data: {:?}", data);
-    println!("Beliefs: {:?}", mu);
     println!("Errors: {:?}", errors);
 }

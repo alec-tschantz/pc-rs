@@ -3,27 +3,30 @@
 Predictive coding in Rust.
 
 ```rust
-mod linalg;
-use crate::linalg::matrix::Matrix;
 
-mod transform;
-use crate::transform::Transform;
+mod linalg;
+mod graph;
+
+use crate::graph::{variable::Variable, transform::Transform, graph::Graph};
+use std::collections::HashSet;
 
 fn main() {
-    let input = Matrix::new(vec![vec![1.0, 2.0], vec![3.0, 4.0]]);
-    let target = Matrix::new(vec![vec![2.0, 3.0], vec![4.0, 5.0]]);
+    let mu = Variable::new("mu", 64);
+    let data = Variable::new("data", 32);
+    let transform = Transform::new(mu.size, data.size);
 
-    let transform = Transform::new(input.cols, target.cols);
+    let mut graph = Graph::new();
+    graph.add_variable(mu.clone());
+    graph.add_variable(data.clone());
+    graph.add_transform(mu.clone(), data.clone(), transform);
 
-    let pred = transform.forward(&input);
-    let err = &target - &pred;
-    let out = transform.backward(&input, &err);
+    graph.forward();
+    
+    let mut target_variables = HashSet::new();
+    target_variables.insert(data.clone());
+    let errors = graph.compute_error(&target_variables);
 
-    println!("Input: {:?}", input);
-    println!("Target: {:?}", target);
-    println!("Prediction: {:?}", pred);
-    println!("Error: {:?}", err);
-    println!("Output: {:?}", out);
+    println!("Errors: {:?}", errors);
 }
 ```
 
