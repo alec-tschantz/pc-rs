@@ -43,7 +43,7 @@ where
         self.nodes.get_mut(index)
     }
 
-    pub fn get_edge(&self, index: usize) ->  Option<& Edge<E>> {
+    pub fn get_edge(&self, index: usize) -> Option<&Edge<E>> {
         self.edges.get(index)
     }
 
