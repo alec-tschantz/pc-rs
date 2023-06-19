@@ -30,6 +30,18 @@ impl Matrix {
         }
     }
 
+    pub fn identity(size: usize) -> Self {
+        let mut data = vec![vec![0.0; size]; size];
+        for i in 0..size {
+            data[i][i] = 1.0;
+        }
+        Self {
+            rows: size,
+            cols: size,
+            data,
+        }
+    }
+
     pub fn apply<F>(&self, f: F) -> Self
     where
         F: Fn(f64) -> f64,
@@ -151,6 +163,26 @@ impl Neg for Matrix {
         result
     }
 }
+
+impl PartialEq for Matrix {
+    fn eq(&self, other: &Self) -> bool {
+        if self.rows != other.rows || self.cols != other.cols {
+            return false;
+        }
+
+        for i in 0..self.rows {
+            for j in 0..self.cols {
+                if (self.data[i][j] - other.data[i][j]).abs() > f64::EPSILON {
+                    return false;
+                }
+            }
+        }
+
+        true
+    }
+}
+
+impl Eq for Matrix {}
 
 impl Clone for Matrix {
     fn clone(&self) -> Self {

@@ -1,3 +1,3 @@
-pub mod linalg;
+pub mod gaussian;
 pub mod graph;
-pub mod infer;
+pub mod linalg;

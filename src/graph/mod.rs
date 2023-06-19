@@ -1,8 +1,12 @@
+use std::collections::HashMap;
+
 use crate::linalg::matrix::Matrix;
 
 pub trait Function<T: Variable> {
     fn forward(&self, input: &T) -> Matrix;
     fn backward(&self, input: &T, target: &T) -> (Matrix, Matrix);
+    fn backward_params(&self, input: &T, target: &T) -> Matrix;
+    fn update(&mut self, derivative: Matrix);
 }
 
 pub trait Variable {
@@ -25,6 +29,51 @@ impl<T: Variable, F: Function<T>> Graph<T, F> {
         Self {
             nodes: Vec::new(),
             edges: Vec::new(),
+        }
+    }
+
+    pub fn forward(&mut self) -> HashMap<(usize, usize), Matrix> {
+        let mut preds: HashMap<(usize, usize), Matrix> = HashMap::new();
+
+        for edge in self.get_edges() {
+            let source = &self.get_node(edge.source).unwrap();
+            let function = &edge.function;
+            let pred = function.forward(source);
+            preds.insert((edge.source, edge.target), pred);
+        }
+
+        return preds;
+    }
+
+    pub fn infer(&mut self) {
+        let mut deltas: HashMap<usize, Vec<Matrix>> = HashMap::new();
+        for (node_index, _) in self.get_nodes().enumerate() {
+            deltas.insert(node_index, Vec::new());
+        }
+
+        for edge in self.get_edges() {
+            let source = &self.get_node(edge.source).unwrap();
+            let target = &self.get_node(edge.target).unwrap();
+            let function = &edge.function;
+            let (source_deriv, target_deriv) = function.backward(source, target);
+
+            deltas.get_mut(&edge.target).unwrap().push(target_deriv);
+            deltas.get_mut(&edge.source).unwrap().push(source_deriv);
+        }
+
+        for (node_index, deltas) in deltas.iter_mut() {
+            let node = self.get_node_mut(*node_index).unwrap();
+            node.update(deltas);
+        }
+    }
+
+    pub fn learn(&mut self) {
+        for i in 0..self.edges.len() {
+            let source = &self.get_node(self.edges[i].source).unwrap();
+            let target = &self.get_node(self.edges[i].target).unwrap();
+
+            let derivative = self.edges[i].function.backward_params(source, target);
+            self.edges[i].function.update(derivative);
         }
     }
 
