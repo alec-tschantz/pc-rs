@@ -2,14 +2,13 @@ use super::matrix::Matrix;
 
 pub enum Activation {
     Linear,
-    ReLU,
 }
 
-pub struct Function {
+pub struct ActivationFunction {
     activation: Activation,
 }
 
-impl Function {
+impl ActivationFunction {
     pub fn new(activation: Activation) -> Self {
         Self { activation }
     }
@@ -17,15 +16,12 @@ impl Function {
     pub fn forward(&self, input: &Matrix) -> Matrix {
         match self.activation {
             Activation::Linear => input.clone(),
-            Activation::ReLU => input.apply(|v| v.max(0.0)),
-            
         }
     }
 
     pub fn backward(&self, input: &Matrix) -> Matrix {
         match self.activation {
             Activation::Linear => Matrix::ones(input.rows, input.cols),
-            Activation::ReLU => input.apply(|v| if v > 0.0 { 1.0 } else { 0.0 }),
         }
     }
 }
