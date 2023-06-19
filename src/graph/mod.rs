@@ -1,12 +1,12 @@
-use std::marker::PhantomData;
+use crate::linalg::matrix::Matrix;
 
-pub trait Function<T: Variable<D>, D> {
-    fn forward(&self, input: &T) -> T;
-    fn backward(&self, input: &T, target: &T) -> (D, D);
+pub trait Function<T: Variable> {
+    fn forward(&self, input: &T) -> Matrix;
+    fn backward(&self, input: &T, target: &T) -> (Matrix, Matrix);
 }
 
-pub trait Variable<D> {
-    fn update(&mut self, derivatives: &Vec<D>);
+pub trait Variable {
+    fn update(&mut self, derivatives: &Vec<Matrix>);
 }
 
 pub struct Edge<F> {
@@ -15,18 +15,16 @@ pub struct Edge<F> {
     pub function: F,
 }
 
-pub struct Graph<T: Variable<D>, F: Function<T, D>, D> {
+pub struct Graph<T: Variable, F: Function<T>> {
     nodes: Vec<T>,
     edges: Vec<Edge<F>>,
-    derivative: PhantomData<D>,
 }
 
-impl<T: Variable<D>, F: Function<T, D>, D> Graph<T, F, D> {
+impl<T: Variable, F: Function<T>> Graph<T, F> {
     pub fn new() -> Self {
         Self {
             nodes: Vec::new(),
             edges: Vec::new(),
-            derivative: PhantomData,
         }
     }
 

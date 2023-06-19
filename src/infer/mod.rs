@@ -1,13 +1,16 @@
 pub mod gaussian;
 
-use crate::graph::{Graph, Function, Variable};
+use crate::{
+    graph::{Function, Graph, Variable},
+    linalg::matrix::Matrix,
+};
 
-use self::gaussian::{GaussianDerivative, GaussianFunction, GaussianVariable};
+use self::gaussian::{GaussianFunction, GaussianVariable};
 use std::collections::HashMap;
 
-pub type VariableDerivatives = HashMap<usize, Vec<GaussianDerivative>>;
+pub type VariableDerivatives = HashMap<usize, Vec<Matrix>>;
 
-pub fn forward(graph: &mut Graph<GaussianVariable, GaussianFunction, GaussianDerivative>) {
+pub fn forward(graph: &mut Graph<GaussianVariable, GaussianFunction>) {
     let mut deltas: VariableDerivatives = HashMap::new();
 
     for (node_index, _) in graph.get_nodes().enumerate() {

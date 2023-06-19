@@ -7,16 +7,6 @@ use crate::linalg::{
     matrix::Matrix,
 };
 
-pub struct GaussianDerivative {
-    pub data: Matrix,
-}
-
-impl GaussianDerivative {
-    pub fn new(data: Matrix) -> Self {
-        Self { data }
-    }
-}
-
 pub struct GaussianVariable {
     pub name: String,
     pub size: usize,
@@ -37,11 +27,11 @@ impl GaussianVariable {
     }
 }
 
-impl Variable<GaussianDerivative> for GaussianVariable {
-    fn update(&mut self, derivatives: &Vec<GaussianDerivative>) {
+impl Variable for GaussianVariable {
+    fn update(&mut self, derivatives: &Vec<Matrix>) {
         if !self.fixed {
             for derivative in derivatives {
-                self.data += &derivative.data.apply(|v| v * 0.01);
+                self.data += &derivative.apply(|v| v * 0.01);
             }
         }
     }
@@ -104,19 +94,15 @@ impl GaussianFunction {
     }
 }
 
-impl Function<GaussianVariable, GaussianDerivative> for GaussianFunction {
-    fn forward(&self, inp: &GaussianVariable) -> GaussianVariable {
+impl Function<GaussianVariable> for GaussianFunction {
+    fn forward(&self, inp: &GaussianVariable) -> Matrix {
         assert_eq!(inp.size, self.params.rows);
         let product = inp.data.matmul(&self.params);
         let out = self.function.forward(&product);
-        GaussianVariable::new(&inp.name, out, false)
+        out
     }
 
-    fn backward(
-        &self,
-        inp: &GaussianVariable,
-        target: &GaussianVariable,
-    ) -> (GaussianDerivative, GaussianDerivative) {
+    fn backward(&self, inp: &GaussianVariable, target: &GaussianVariable) -> (Matrix, Matrix) {
         assert_eq!(inp.size, self.params.rows);
         let product = &inp.data.matmul(&self.params);
         let pred = self.function.forward(&product);
@@ -124,8 +110,8 @@ impl Function<GaussianVariable, GaussianDerivative> for GaussianFunction {
         let fn_deriv = self.function.backward(&product);
         let err_deriv = &err * &fn_deriv;
         let out = err_deriv.matmul(&self.params.transpose());
-        let source_deriv = GaussianDerivative::new(out);
-        let target_deriv = GaussianDerivative::new(-err);
+        let source_deriv = out;
+        let target_deriv = -err;
         (source_deriv, target_deriv)
     }
 }

@@ -1,5 +1,5 @@
 use std::fmt;
-use std::ops::{Add, AddAssign, SubAssign, Mul, Sub, Neg};
+use std::ops::{Add, AddAssign, Mul, Neg, Sub, SubAssign};
 
 pub struct Matrix {
     pub rows: usize,
