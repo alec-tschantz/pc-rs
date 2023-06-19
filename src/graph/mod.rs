@@ -43,6 +43,14 @@ where
         self.nodes.get_mut(index)
     }
 
+    pub fn get_edge(&self, index: usize) ->  Option<& Edge<E>> {
+        self.edges.get(index)
+    }
+
+    pub fn get_edge_mut(&mut self, index: usize) -> Option<&mut Edge<E>> {
+        self.edges.get_mut(index)
+    }
+
     pub fn get_edges(&self) -> std::slice::Iter<Edge<E>> {
         self.edges.iter()
     }

@@ -6,14 +6,15 @@ use crate::linalg::{
 use super::variable::Variable;
 
 pub struct Transform {
-    params: Matrix,
+    pub params: Matrix,
+    pub fixed: bool,
     function: Function,
 }
 
 impl Transform {
-    pub fn new(params: Matrix, activation: Activation) -> Self {
+    pub fn new(params: Matrix, activation: Activation, fixed: bool) -> Self {
         let function = Function::new(activation);
-        Self { function, params }
+        Self { function, params, fixed }
     }
 
     pub fn forward(&self, inp: &Variable) -> Matrix {
@@ -29,6 +30,15 @@ impl Transform {
         let fn_deriv = self.function.backward(&product);
         let err_deriv = err * &fn_deriv;
         let out = err_deriv.matmul(&self.params.transpose());
+        out
+    }
+
+    pub fn backward_params(&self, inp: &Variable, err: &Matrix) -> Matrix {
+        assert_eq!(inp.size, self.params.rows);
+        let product = &inp.data.matmul(&self.params);
+        let fn_deriv = self.function.backward(&product);
+        let err_deriv = err * &fn_deriv;
+        let out = inp.data.transpose().matmul(&err_deriv);
         out
     }
 }
