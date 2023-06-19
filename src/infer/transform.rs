@@ -11,9 +11,8 @@ pub struct Transform {
 }
 
 impl Transform {
-    pub fn new(input_size: usize, output_size: usize) -> Self {
-        let params = Matrix::new(vec![vec![0.1; output_size]; input_size]);
-        let function = Function::new(Activation::ReLU);
+    pub fn new(params: Matrix, activation: Activation) -> Self {
+        let function = Function::new(activation);
         Self { function, params }
     }
 

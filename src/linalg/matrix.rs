@@ -1,5 +1,5 @@
 use std::fmt;
-use std::ops::{Add, Mul, Sub};
+use std::ops::{Add, AddAssign, SubAssign, Mul, Sub, Neg};
 
 pub struct Matrix {
     pub rows: usize,
@@ -82,6 +82,18 @@ impl<'a, 'b> Add<&'b Matrix> for &'a Matrix {
     }
 }
 
+impl AddAssign<&Matrix> for Matrix {
+    fn add_assign(&mut self, other: &Matrix) {
+        assert_eq!(self.rows, other.rows);
+        assert_eq!(self.cols, other.cols);
+        for i in 0..self.rows {
+            for j in 0..self.cols {
+                self.data[i][j] += other.data[i][j];
+            }
+        }
+    }
+}
+
 impl<'a, 'b> Mul<&'b Matrix> for &'a Matrix {
     type Output = Matrix;
 
@@ -108,6 +120,32 @@ impl<'a, 'b> Sub<&'b Matrix> for &'a Matrix {
         for i in 0..self.rows {
             for j in 0..self.cols {
                 result.data[i][j] = self.data[i][j] - other.data[i][j];
+            }
+        }
+        result
+    }
+}
+
+impl SubAssign<&Matrix> for Matrix {
+    fn sub_assign(&mut self, other: &Matrix) {
+        assert_eq!(self.rows, other.rows);
+        assert_eq!(self.cols, other.cols);
+        for i in 0..self.rows {
+            for j in 0..self.cols {
+                self.data[i][j] -= other.data[i][j];
+            }
+        }
+    }
+}
+
+impl Neg for Matrix {
+    type Output = Matrix;
+
+    fn neg(self) -> Self::Output {
+        let mut result = Matrix::zeros(self.rows, self.cols);
+        for i in 0..self.rows {
+            for j in 0..self.cols {
+                result.data[i][j] = -self.data[i][j];
             }
         }
         result
