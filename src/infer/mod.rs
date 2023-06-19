@@ -4,14 +4,10 @@ use crate::{
     graph::{Function, Graph, Variable},
     linalg::matrix::Matrix,
 };
-
-use self::gaussian::{GaussianFunction, GaussianVariable};
 use std::collections::HashMap;
 
-pub type VariableDerivatives = HashMap<usize, Vec<Matrix>>;
-
-pub fn forward(graph: &mut Graph<GaussianVariable, GaussianFunction>) {
-    let mut deltas: VariableDerivatives = HashMap::new();
+pub fn forward<T: Variable, F: Function<T>>(graph: &mut Graph<T, F>) {
+    let mut deltas: HashMap<usize, Vec<Matrix>> = HashMap::new();
 
     for (node_index, _) in graph.get_nodes().enumerate() {
         deltas.insert(node_index, Vec::new());
