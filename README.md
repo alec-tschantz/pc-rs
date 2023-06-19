@@ -8,7 +8,7 @@ mod infer;
 mod linalg;
 
 use graph::Graph;
-use infer::gaussian::{GaussianDerivative, GaussianFunction, GaussianVariable};
+use infer::gaussian::{GaussianFunction, GaussianVariable};
 use linalg::{math::Activation, matrix::Matrix};
 
 fn main() {
@@ -34,7 +34,7 @@ fn main() {
     let prior_mu_transform = GaussianFunction::new(prior_mu_values, Activation::Linear, false);
     let mu_data_transform = GaussianFunction::new(mu_data_values, Activation::Linear, true);
 
-    let mut graph = Graph::<GaussianVariable, GaussianFunction, GaussianDerivative>::new();
+    let mut graph = Graph::<GaussianVariable, GaussianFunction>::new();
     let prior_index = graph.add_node(prior);
     let mu_index = graph.add_node(mu);
     let data_index = graph.add_node(data);
@@ -50,7 +50,6 @@ fn main() {
     let mu = graph.get_node(mu_index).unwrap();
     println!("mu: {:?}", mu);
 }
-
 ```
 
 To run a demo:
