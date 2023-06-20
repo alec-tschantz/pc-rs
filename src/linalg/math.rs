@@ -1,9 +1,11 @@
 use super::matrix::Matrix;
 
+#[derive(Clone, Debug)]
 pub enum Activation {
     Linear,
 }
 
+#[derive(Clone, Debug)]
 pub struct ActivationFunction {
     activation: Activation,
 }

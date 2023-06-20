@@ -6,7 +6,7 @@ pub struct GaussianVariable {
     pub name: String,
     pub size: usize,
     pub data: Matrix,
-    pub fixed: bool,
+    fixed: bool,
 }
 
 impl GaussianVariable {

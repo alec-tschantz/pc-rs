@@ -12,28 +12,24 @@ use graph::Graph;
 use linalg::{math::Activation, matrix::Matrix};
 
 fn main() {
-    let prior_values = Matrix::new(vec![vec![10.0; 32]]);
-    let mu_values = Matrix::new(vec![vec![1.0; 32]]);
-    let data_values = Matrix::new(vec![vec![10.0; 32]]);
+    let prior = GaussianVariable::new("prior", Matrix::ones(1, 32) * 4.0, true);
+    let mu = GaussianVariable::new("mu", Matrix::random(1, 32), false);
+    let data = GaussianVariable::new("data", Matrix::ones(1, 32) * 2.0, true);
 
-    let prior = GaussianVariable::new("prior", prior_values, true);
-    let mu = GaussianVariable::new("mu", mu_values, false);
-    let data = GaussianVariable::new("data", data_values, true);
-
-    let prior_mu_transform = GaussianFunction::new(Matrix::identity(32), Activation::Linear, false);
-    let mu_data_transform = GaussianFunction::new(Matrix::identity(32), Activation::Linear, false);
+    let prior_mu_function = GaussianFunction::new(Matrix::identity(32), Activation::Linear);
+    let mu_data_function = GaussianFunction::new(Matrix::identity(32), Activation::Linear);
 
     let mut graph = Graph::<GaussianVariable, GaussianFunction>::new();
     let prior_index = graph.add_node(prior);
     let mu_index = graph.add_node(mu);
     let data_index = graph.add_node(data);
+    
     graph.add_edges(vec![
-        (prior_index, mu_index, prior_mu_transform),
-        (mu_index, data_index, mu_data_transform),
+        (prior_index, mu_index, prior_mu_function),
+        (mu_index, data_index, mu_data_function),
     ]);
 
-
-    for _ in 0..100 {
+    for _ in 0..500 {
         graph.infer();
     }
     graph.learn();
@@ -45,7 +41,6 @@ fn main() {
     let mu_data_pred = preds.get(&(mu_index, data_index)).unwrap();
     println!("mu_data_pred: {:?}", mu_data_pred);
 }
-
 ```
 
 To run a demo:

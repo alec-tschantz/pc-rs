@@ -6,6 +6,7 @@ use crate::linalg::{
 
 use super::variable::GaussianVariable;
 
+#[derive(Clone, Debug)]
 pub struct GaussianFunction {
     pub params: Matrix,
     activation: ActivationFunction,
@@ -13,12 +14,12 @@ pub struct GaussianFunction {
 }
 
 impl GaussianFunction {
-    pub fn new(params: Matrix, activation: Activation, fixed: bool) -> Self {
+    pub fn new(params: Matrix, activation: Activation) -> Self {
         let activation = ActivationFunction::new(activation);
         Self {
             params,
             activation,
-            fixed,
+            fixed: false,
         }
     }
 }

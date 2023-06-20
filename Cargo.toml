@@ -2,3 +2,7 @@
 name = "pc-rs"
 version = "0.0.0"    
 authors = ["Alexander Tschantz <tschantz.alec@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+rand = "0.8.5"

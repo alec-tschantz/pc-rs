@@ -1,6 +1,8 @@
 use std::fmt;
 use std::ops::{Add, AddAssign, Mul, Neg, Sub, SubAssign};
 
+use rand::Rng;
+
 pub struct Matrix {
     pub rows: usize,
     pub cols: usize,
@@ -40,6 +42,14 @@ impl Matrix {
             cols: size,
             data,
         }
+    }
+
+    pub fn random(rows: usize, cols: usize) -> Self {
+        let mut rng = rand::thread_rng();
+        let data = (0..rows)
+            .map(|_| (0..cols).map(|_| rng.gen::<f64>()).collect())
+            .collect();
+        Self { rows, cols, data }
     }
 
     pub fn apply<F>(&self, f: F) -> Self
@@ -94,6 +104,20 @@ impl<'a, 'b> Add<&'b Matrix> for &'a Matrix {
     }
 }
 
+impl Add<f64> for Matrix {
+    type Output = Matrix;
+
+    fn add(self, scalar: f64) -> Self::Output {
+        let mut result = Matrix::zeros(self.rows, self.cols);
+        for i in 0..self.rows {
+            for j in 0..self.cols {
+                result.data[i][j] = self.data[i][j] + scalar;
+            }
+        }
+        result
+    }
+}
+
 impl AddAssign<&Matrix> for Matrix {
     fn add_assign(&mut self, other: &Matrix) {
         assert_eq!(self.rows, other.rows);
@@ -116,6 +140,20 @@ impl<'a, 'b> Mul<&'b Matrix> for &'a Matrix {
         for i in 0..self.rows {
             for j in 0..self.cols {
                 result.data[i][j] = self.data[i][j] * other.data[i][j];
+            }
+        }
+        result
+    }
+}
+
+impl Mul<f64> for Matrix {
+    type Output = Matrix;
+
+    fn mul(self, scalar: f64) -> Self::Output {
+        let mut result = Matrix::zeros(self.rows, self.cols);
+        for i in 0..self.rows {
+            for j in 0..self.cols {
+                result.data[i][j] = self.data[i][j] * scalar;
             }
         }
         result
