@@ -2,14 +2,14 @@ mod gaussian;
 mod graph;
 mod linalg;
 
-use crate::gaussian::{function::GaussianFunction, variable::GaussianVariable};
+use gaussian::{function::GaussianFunction, variable::GaussianVariable};
 use graph::Graph;
 use linalg::{math::Activation, matrix::Matrix, vector::Vector};
 
-const MU_SIZE: usize = 16;
-const DATA_A_SIZE: usize = 32;
-const DATA_B_SIZE: usize = 64;
-const BATCH_SIZE: usize = 8;
+const MU_SIZE: usize = 10;
+const DATA_A_SIZE: usize = 128;
+const DATA_B_SIZE: usize = 128;
+const BATCH_SIZE: usize = 64;
 const NUM_EPOCHS: usize = 10;
 const NUM_ITERATIONS: usize = 12;
 

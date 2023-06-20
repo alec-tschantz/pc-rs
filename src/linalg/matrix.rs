@@ -3,6 +3,7 @@ use std::ops::{Add, AddAssign, Mul, Neg, Sub, SubAssign};
 
 use rand::Rng;
 use rand_distr::{Distribution, Normal};
+use rayon::prelude::*;
 
 use super::vector::Vector;
 
@@ -98,24 +99,24 @@ impl Matrix {
 
     pub fn transpose(&self) -> Self {
         let mut transposed_data = vec![vec![0.0; self.rows]; self.cols];
-        for i in 0..self.rows {
-            for j in 0..self.cols {
-                transposed_data[j][i] = self.data[i][j];
+        transposed_data.par_iter_mut().enumerate().for_each(|(j, row)| {
+            for i in 0..self.rows {
+                row[i] = self.data[i][j];
             }
-        }
+        });
         Self::new(transposed_data)
     }
 
     pub fn matmul(&self, other: &Matrix) -> Matrix {
         assert_eq!(self.cols, other.rows);
         let mut result = Matrix::zeros(self.rows, other.cols);
-        for i in 0..self.rows {
+        result.data.par_iter_mut().enumerate().for_each(|(i, row)| {
             for j in 0..other.cols {
                 for k in 0..self.cols {
-                    result.data[i][j] += self.data[i][k] * other.data[k][j];
+                    row[j] += self.data[i][k] * other.data[k][j];
                 }
             }
-        }
+        });
         result
     }
 
@@ -209,11 +210,11 @@ impl<'a, 'b> Mul<&'b Matrix> for &'a Matrix {
         assert_eq!(self.rows, other.rows);
         assert_eq!(self.cols, other.cols);
         let mut result = Matrix::zeros(self.rows, self.cols);
-        for i in 0..self.rows {
+        result.data.par_iter_mut().enumerate().for_each(|(i, row)| {
             for j in 0..self.cols {
-                result.data[i][j] = self.data[i][j] * other.data[i][j];
+                row[j] = self.data[i][j] * other.data[i][j];
             }
-        }
+        });
         result
     }
 }

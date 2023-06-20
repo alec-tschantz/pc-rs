@@ -24,7 +24,7 @@ impl Variable for GaussianVariable {
     fn update(&mut self, derivatives: &Vec<Matrix>) {
         if !self.fixed {
             for derivative in derivatives {
-                self.data += &derivative.apply(|v| v * 0.01);
+                self.data += &derivative.apply(|v| v * 0.001);
             }
         }
     }

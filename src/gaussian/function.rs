@@ -65,8 +65,8 @@ impl Function<GaussianVariable> for GaussianFunction {
     fn update(&mut self, derivatives: (Matrix, Vector)) {
         if !self.fixed {
             let (weight_deriv, bias_deriv) = derivatives;
-            self.weights += &weight_deriv.apply(|v| v * 0.01);
-            self.bias += &bias_deriv.apply(|v| v * 0.01);
+            self.weights += &weight_deriv.apply(|v| v * 0.001);
+            self.bias += &bias_deriv.apply(|v| v * 0.001);
         }
     }
 }
