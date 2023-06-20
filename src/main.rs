@@ -6,12 +6,12 @@ use crate::gaussian::{function::GaussianFunction, variable::GaussianVariable};
 use graph::Graph;
 use linalg::{math::Activation, matrix::Matrix, vector::Vector};
 
-const MU_SIZE: usize = 3;
-const DATA_A_SIZE: usize = 6;
-const DATA_B_SIZE: usize = 4;
-const BATCH_SIZE: usize = 1;
-const NUM_EPOCHS: usize = 100;
-const NUM_ITERATIONS: usize = 100;
+const MU_SIZE: usize = 16;
+const DATA_A_SIZE: usize = 32;
+const DATA_B_SIZE: usize = 64;
+const BATCH_SIZE: usize = 8;
+const NUM_EPOCHS: usize = 10;
+const NUM_ITERATIONS: usize = 12;
 
 fn main() {
     let mu = GaussianVariable::new(Matrix::normal(BATCH_SIZE, MU_SIZE, 0.0, 0.05), false);
@@ -52,6 +52,6 @@ fn main() {
     let preds = graph.forward();
     let mu_data_a_pred = preds.get(&(mu_index, data_a_index)).unwrap();
     let mu_data_b_pred = preds.get(&(mu_index, data_b_index)).unwrap();
-    println!("mu_data_a_pred: {:?}", mu_data_a_pred);
-    println!("mu_data_b_pred: {:?}", mu_data_b_pred);
+    println!("mu_data_a_pred: {:?}", mu_data_a_pred.mean());
+    println!("mu_data_b_pred: {:?}", mu_data_b_pred.mean());
 }

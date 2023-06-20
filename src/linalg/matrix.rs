@@ -78,6 +78,12 @@ impl Matrix {
         Self { rows, cols, data }
     }
 
+    pub fn mean(&self) -> f64 {
+        let total_elements = (self.rows * self.cols) as f64;
+        let sum: f64 = self.data.iter().flat_map(|row| row.iter()).cloned().sum();
+        sum / total_elements
+    }
+
     pub fn apply<F>(&self, f: F) -> Self
     where
         F: Fn(f64) -> f64,
