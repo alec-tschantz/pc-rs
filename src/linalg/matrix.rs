@@ -2,6 +2,9 @@ use std::fmt;
 use std::ops::{Add, AddAssign, Mul, Neg, Sub, SubAssign};
 
 use rand::Rng;
+use rand_distr::{Distribution, Normal};
+
+use super::vector::Vector;
 
 pub struct Matrix {
     pub rows: usize,
@@ -52,6 +55,29 @@ impl Matrix {
         Self { rows, cols, data }
     }
 
+    pub fn normal(rows: usize, cols: usize, mean: f64, std: f64) -> Self {
+        let normal = Normal::new(mean, std).unwrap();
+        let mut rng = rand::thread_rng();
+
+        let data = (0..rows)
+            .map(|_| (0..cols).map(|_| normal.sample(&mut rng)).collect())
+            .collect();
+
+        Self { rows, cols, data }
+    }
+
+    pub fn kaiming_normal(rows: usize, cols: usize) -> Self {
+        let kappa = f64::sqrt(2.0 / rows as f64);
+        let normal = Normal::new(0.0, kappa).unwrap();
+        let mut rng = rand::thread_rng();
+
+        let data = (0..rows)
+            .map(|_| (0..cols).map(|_| normal.sample(&mut rng)).collect())
+            .collect();
+
+        Self { rows, cols, data }
+    }
+
     pub fn apply<F>(&self, f: F) -> Self
     where
         F: Fn(f64) -> f64,
@@ -86,6 +112,30 @@ impl Matrix {
         }
         result
     }
+
+    pub fn sum(&self, axis: usize) -> Vector {
+        match axis {
+            0 => {
+                let mut result = vec![0.0; self.cols];
+                for i in 0..self.rows {
+                    for j in 0..self.cols {
+                        result[j] += self.data[i][j];
+                    }
+                }
+                Vector::new(result)
+            }
+            1 => {
+                let mut result = vec![0.0; self.rows];
+                for i in 0..self.rows {
+                    for j in 0..self.cols {
+                        result[i] += self.data[i][j];
+                    }
+                }
+                Vector::new(result)
+            }
+            _ => panic!("Axis {} is not supported.", axis),
+        }
+    }
 }
 
 impl<'a, 'b> Add<&'b Matrix> for &'a Matrix {
@@ -98,6 +148,22 @@ impl<'a, 'b> Add<&'b Matrix> for &'a Matrix {
         for i in 0..self.rows {
             for j in 0..self.cols {
                 result.data[i][j] = self.data[i][j] + other.data[i][j];
+            }
+        }
+        result
+    }
+}
+
+impl<'a, 'b> Add<&'b Vector> for &'a Matrix {
+    type Output = Matrix;
+
+    fn add(self, vector: &'b Vector) -> Self::Output {
+        assert_eq!(self.cols, vector.size);
+
+        let mut result = Matrix::zeros(self.rows, self.cols);
+        for i in 0..self.rows {
+            for j in 0..self.cols {
+                result.data[i][j] = self.data[i][j] + vector.data[j];
             }
         }
         result

@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 
-use crate::linalg::matrix::Matrix;
+use crate::linalg::{matrix::Matrix, vector::Vector};
 
 pub trait Function<T: Variable> {
     fn forward(&self, input: &T) -> Matrix;
     fn backward(&self, input: &T, target: &T) -> (Matrix, Matrix);
-    fn backward_params(&self, input: &T, target: &T) -> Matrix;
-    fn update(&mut self, derivative: Matrix);
+    fn backward_params(&self, input: &T, target: &T) -> (Matrix, Vector);
+    fn update(&mut self, derivatives: (Matrix, Vector));
 }
 
 pub trait Variable {

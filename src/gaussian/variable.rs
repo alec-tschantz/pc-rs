@@ -3,22 +3,20 @@ use crate::linalg::matrix::Matrix;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct GaussianVariable {
-    pub name: String,
     pub size: usize,
     pub data: Matrix,
     fixed: bool,
 }
 
 impl GaussianVariable {
-    pub fn new(name: &str, data: Matrix, fixed: bool) -> Self {
-        let name = name.to_string();
+    pub fn new(data: Matrix, fixed: bool) -> Self {
         let size = data.cols;
-        Self {
-            name,
-            size,
-            data,
-            fixed,
-        }
+        Self { size, data, fixed }
+    }
+
+    pub fn set_data(&mut self, data: Matrix) {
+        assert_eq!(data.cols, self.size);
+        self.data = data;
     }
 }
 
