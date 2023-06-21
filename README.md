@@ -73,3 +73,24 @@ To run tests:
 ```bash
 cargo test
 ```
+
+## Tasks
+- Create `Variable` trait that `T` and `F` implement
+- Create `optim` which accept `Gradient` objects and calls their update function, uses index to reference to gradient and update the graph
+- `graph.infer` adds gradients to `optim`
+- `optim.step` updates gradients and updates the graph
+- Setup an `optim` for both variables and functions
+
+```rust
+pub trait Derivative {}
+
+pub trait Variable {
+    fn update(&mut self, derivatives: &Vec<Gradient>);
+}
+
+pub trait Function<T: Variable, G: Gradient, D: Gradient> {
+    fn forward(&self, input: &T) -> Matrix;
+    fn backward(&self, input: &T, target: &T) -> (G, G);
+    fn backward_params(&self, input: &T, target: &T) -> D;
+}
+```

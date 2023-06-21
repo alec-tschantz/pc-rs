@@ -2,8 +2,8 @@ use std::fmt;
 use std::ops::{Add, AddAssign, Mul, Neg, Sub, SubAssign};
 
 use rand::Rng;
-use rand_distr::{Distribution, Normal};
 use rayon::prelude::*;
+use rand_distr::{Distribution, Normal};
 
 use super::vector::Vector;
 
@@ -99,11 +99,14 @@ impl Matrix {
 
     pub fn transpose(&self) -> Self {
         let mut transposed_data = vec![vec![0.0; self.rows]; self.cols];
-        transposed_data.par_iter_mut().enumerate().for_each(|(j, row)| {
-            for i in 0..self.rows {
-                row[i] = self.data[i][j];
-            }
-        });
+        transposed_data
+            .par_iter_mut()
+            .enumerate()
+            .for_each(|(j, row)| {
+                for i in 0..self.rows {
+                    row[i] = self.data[i][j];
+                }
+            });
         Self::new(transposed_data)
     }
 

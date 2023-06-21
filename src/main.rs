@@ -11,7 +11,7 @@ const DATA_A_SIZE: usize = 128;
 const DATA_B_SIZE: usize = 128;
 const BATCH_SIZE: usize = 64;
 const NUM_EPOCHS: usize = 10;
-const NUM_ITERATIONS: usize = 12;
+const NUM_ITERATIONS: usize = 20;
 
 fn main() {
     let mu = GaussianVariable::new(Matrix::normal(BATCH_SIZE, MU_SIZE, 0.0, 0.05), false);
